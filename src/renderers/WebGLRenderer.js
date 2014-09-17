@@ -186,6 +186,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	var _glExtensionTextureFloat;
 	var _glExtensionTextureFloatLinear;
+	var _glExtensionDepthTexture;
 	var _glExtensionStandardDerivatives;
 	var _glExtensionTextureFilterAnisotropic;
 	var _glExtensionCompressedTextureS3TC;
@@ -268,6 +269,12 @@ THREE.WebGLRenderer = function ( parameters ) {
 	this.supportsFloatTextures = function () {
 
 		return _glExtensionTextureFloat;
+
+	};
+
+	this.supportsDepthTextures = function () {
+
+		return _glExtensionDepthTexture;
 
 	};
 
@@ -698,14 +705,14 @@ THREE.WebGLRenderer = function ( parameters ) {
 			for ( var i = 0; i < 6; i ++ ) {
 
 				_gl.deleteFramebuffer( renderTarget.__webglFramebuffer[ i ] );
-				_gl.deleteRenderbuffer( renderTarget.__webglRenderbuffer[ i ] );
+				if (renderTarget.__webglRenderbuffer) _gl.deleteRenderbuffer( renderTarget.__webglRenderbuffer[ i ] );
 
 			}
 
 		} else {
 
 			_gl.deleteFramebuffer( renderTarget.__webglFramebuffer );
-			_gl.deleteRenderbuffer( renderTarget.__webglRenderbuffer );
+			if (renderTarget.__webglRenderbuffer) _gl.deleteRenderbuffer( renderTarget.__webglRenderbuffer );
 
 		}
 
@@ -5508,6 +5515,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		}
 
+
 		if ( _glExtensionTextureFilterAnisotropic && texture.type !== THREE.FloatType ) {
 
 			if ( texture.anisotropy > 1 || texture.__oldAnisotropy ) {
@@ -5764,14 +5772,14 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	// Render targets
 
-	function setupFrameBuffer ( framebuffer, renderTarget, textureTarget ) {
+	function setupFrameBufferTexture ( framebuffer, texture, attachment, textureTarget ) {
 
 		_gl.bindFramebuffer( _gl.FRAMEBUFFER, framebuffer );
-		_gl.framebufferTexture2D( _gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, textureTarget, renderTarget.__webglTexture, 0 );
+		_gl.framebufferTexture2D( _gl.FRAMEBUFFER, attachment, textureTarget, texture, 0 );
 
 	};
 
-	function setupRenderBuffer ( renderbuffer, renderTarget  ) {
+	function setupRenderBufferStorage ( renderbuffer, renderTarget  ) {
 
 		_gl.bindRenderbuffer( _gl.RENDERBUFFER, renderbuffer );
 
@@ -5799,14 +5807,54 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	};
 
+	function setupDepthRenderbuffer(renderTarget) {
+			
+		var isCube = ( renderTarget instanceof THREE.WebGLRenderTargetCube );
+		if ( isCube ) {
+
+			renderTarget.__webglRenderbuffer = [];
+			for ( var i = 0; i < 6; i ++ ) {
+
+				renderTarget.__webglRenderbuffer[ i ] = _gl.createRenderbuffer();
+				setupRenderBufferStorage( renderTarget.__webglRenderbuffer[ i ], renderTarget );
+
+			}
+
+		}
+		else {
+
+			if ( renderTarget.shareDepthFrom ) {
+				
+				renderTarget.__webglRenderbuffer = renderTarget.shareDepthFrom.__webglRenderbuffer;
+				if ( renderTarget.depthBuffer && ! renderTarget.stencilBuffer ) {
+					
+					_gl.framebufferRenderbuffer( _gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT, _gl.RENDERBUFFER, renderTarget.__webglRenderbuffer );
+					
+				} else if ( renderTarget.depthBuffer && renderTarget.stencilBuffer ) {
+					
+					_gl.framebufferRenderbuffer( _gl.FRAMEBUFFER, _gl.DEPTH_STENCIL_ATTACHMENT, _gl.RENDERBUFFER, renderTarget.__webglRenderbuffer );
+					
+				}
+				
+			} else {
+				
+				renderTarget.__webglRenderbuffer = _gl.createRenderbuffer();
+				setupRenderBufferStorage( renderTarget.__webglRenderbuffer, renderTarget );
+				
+			}
+			
+		}
+		
+		_gl.bindRenderbuffer( _gl.RENDERBUFFER, null );
+
+	};
+
+
 	this.setRenderTarget = function ( renderTarget ) {
 
 		var isCube = ( renderTarget instanceof THREE.WebGLRenderTargetCube );
 
 		if ( renderTarget && ! renderTarget.__webglFramebuffer ) {
-
-			if ( renderTarget.depthBuffer === undefined ) renderTarget.depthBuffer = true;
-			if ( renderTarget.stencilBuffer === undefined ) renderTarget.stencilBuffer = true;
 
 			renderTarget.addEventListener( 'dispose', onRenderTargetDispose );
 
@@ -5814,8 +5862,9 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			_this.info.memory.textures ++;
 
-			// Setup texture, create render and frame buffers
-
+			//
+			// Setup color buffer
+			//
 			var isTargetPowerOfTwo = THREE.Math.isPowerOfTwo( renderTarget.width ) && THREE.Math.isPowerOfTwo( renderTarget.height ),
 				glFormat = paramThreeToGL( renderTarget.format ),
 				glType = paramThreeToGL( renderTarget.type );
@@ -5823,7 +5872,6 @@ THREE.WebGLRenderer = function ( parameters ) {
 			if ( isCube ) {
 
 				renderTarget.__webglFramebuffer = [];
-				renderTarget.__webglRenderbuffer = [];
 
 				_gl.bindTexture( _gl.TEXTURE_CUBE_MAP, renderTarget.__webglTexture );
 				setTextureParameters( _gl.TEXTURE_CUBE_MAP, renderTarget, isTargetPowerOfTwo );
@@ -5831,12 +5879,10 @@ THREE.WebGLRenderer = function ( parameters ) {
 				for ( var i = 0; i < 6; i ++ ) {
 
 					renderTarget.__webglFramebuffer[ i ] = _gl.createFramebuffer();
-					renderTarget.__webglRenderbuffer[ i ] = _gl.createRenderbuffer();
 
 					_gl.texImage2D( _gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, glFormat, renderTarget.width, renderTarget.height, 0, glFormat, glType, null );
 
-					setupFrameBuffer( renderTarget.__webglFramebuffer[ i ], renderTarget, _gl.TEXTURE_CUBE_MAP_POSITIVE_X + i );
-					setupRenderBuffer( renderTarget.__webglRenderbuffer[ i ], renderTarget );
+					setupFrameBufferTexture( renderTarget.__webglFramebuffer[ i ], renderTarget.__webglTexture, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_CUBE_MAP_POSITIVE_X + i );
 
 				}
 
@@ -5846,46 +5892,18 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 				renderTarget.__webglFramebuffer = _gl.createFramebuffer();
 
-				if ( renderTarget.shareDepthFrom ) {
-
-					renderTarget.__webglRenderbuffer = renderTarget.shareDepthFrom.__webglRenderbuffer;
-
-				} else {
-
-					renderTarget.__webglRenderbuffer = _gl.createRenderbuffer();
-
-				}
-
 				_gl.bindTexture( _gl.TEXTURE_2D, renderTarget.__webglTexture );
 				setTextureParameters( _gl.TEXTURE_2D, renderTarget, isTargetPowerOfTwo );
 
 				_gl.texImage2D( _gl.TEXTURE_2D, 0, glFormat, renderTarget.width, renderTarget.height, 0, glFormat, glType, null );
 
-				setupFrameBuffer( renderTarget.__webglFramebuffer, renderTarget, _gl.TEXTURE_2D );
-
-				if ( renderTarget.shareDepthFrom ) {
-
-					if ( renderTarget.depthBuffer && ! renderTarget.stencilBuffer ) {
-
-						_gl.framebufferRenderbuffer( _gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT, _gl.RENDERBUFFER, renderTarget.__webglRenderbuffer );
-
-					} else if ( renderTarget.depthBuffer && renderTarget.stencilBuffer ) {
-
-						_gl.framebufferRenderbuffer( _gl.FRAMEBUFFER, _gl.DEPTH_STENCIL_ATTACHMENT, _gl.RENDERBUFFER, renderTarget.__webglRenderbuffer );
-
-					}
-
-				} else {
-
-					setupRenderBuffer( renderTarget.__webglRenderbuffer, renderTarget );
-
-				}
+				setupFrameBufferTexture( renderTarget.__webglFramebuffer, renderTarget.__webglTexture, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_2D );
 
 				if ( isTargetPowerOfTwo ) _gl.generateMipmap( _gl.TEXTURE_2D );
 
 			}
 
-			// Release everything
+			// Release textures
 
 			if ( isCube ) {
 
@@ -5897,7 +5915,14 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			}
 
-			_gl.bindRenderbuffer( _gl.RENDERBUFFER, null );
+			//
+			// Setup depth and stencil buffers
+			//
+			if ( renderTarget.depthBuffer === undefined ) renderTarget.depthBuffer = true;
+			if ( renderTarget.stencilBuffer === undefined ) renderTarget.stencilBuffer = true;
+
+			setupDepthRenderbuffer();
+
 			_gl.bindFramebuffer( _gl.FRAMEBUFFER, null );
 
 		}
@@ -6159,6 +6184,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		_glExtensionTextureFloat = _gl.getExtension( 'OES_texture_float' );
 		_glExtensionTextureFloatLinear = _gl.getExtension( 'OES_texture_float_linear' );
+		_glExtensionDepthTexture = _gl.getExtension( 'WEBGL_depth_texture' );
 		_glExtensionStandardDerivatives = _gl.getExtension( 'OES_standard_derivatives' );
 
 		_glExtensionTextureFilterAnisotropic = _gl.getExtension( 'EXT_texture_filter_anisotropic' ) || _gl.getExtension( 'MOZ_EXT_texture_filter_anisotropic' ) || _gl.getExtension( 'WEBKIT_EXT_texture_filter_anisotropic' );
@@ -6177,6 +6203,12 @@ THREE.WebGLRenderer = function ( parameters ) {
 		if ( _glExtensionStandardDerivatives === null ) {
 
 			console.log( 'THREE.WebGLRenderer: Standard derivatives not supported.' );
+
+		}
+
+		if ( _glExtensionDepthTexture === null ) {
+
+			console.log( 'THREE.WebGLRenderer: Depth textures not supported.' );
 
 		}
 
