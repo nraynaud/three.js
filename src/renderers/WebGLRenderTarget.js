@@ -26,6 +26,7 @@ THREE.WebGLRenderTarget = function ( width, height, options ) {
 
 	this.depthBuffer = options.depthBuffer !== undefined ? options.depthBuffer : true;
 	this.stencilBuffer = options.stencilBuffer !== undefined ? options.stencilBuffer : true;
+	this.depthTexture = options.depthTexture;
 
 	this.generateMipmaps = true;
 
@@ -64,6 +65,7 @@ THREE.WebGLRenderTarget.prototype = {
 
 		tmp.depthBuffer = this.depthBuffer;
 		tmp.stencilBuffer = this.stencilBuffer;
+		if (this.depthTexture) tmp.depthTexture = this.depthTexture.clone();
 
 		tmp.generateMipmaps = this.generateMipmaps;
 
