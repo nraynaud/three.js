@@ -5,7 +5,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	</head>
-	<body>
+	<body ontouchstart="">
 		<link href="css/main.css" rel="stylesheet" />
 		<link id="theme" href="css/light.css" rel="stylesheet" />
 
@@ -36,11 +36,6 @@
 		<script src="../examples/js/renderers/SoftwareRenderer.js"></script>
 		<script src="../examples/js/renderers/SVGRenderer.js"></script>
 
-		<link href="js/libs/codemirror/codemirror.css" rel="stylesheet" />
-		<script src="js/libs/codemirror/codemirror.js"></script>
-		<script src="js/libs/codemirror/modes/javascript.js"></script>
-
-
 		<script src="js/libs/signals.min.js"></script>
 		<script src="js/libs/ui.js"></script>
 		<script src="js/libs/ui.editor.js"></script>
@@ -60,6 +55,7 @@
 		<script src="js/Menubar.Play.js"></script>
 		<script src="js/Menubar.View.js"></script>
 		<script src="js/Menubar.Help.js"></script>
+		<script src="js/Menubar.Status.js"></script>
 		<script src="js/Sidebar.js"></script>
 		<script src="js/Sidebar.Renderer.js"></script>
 		<script src="js/Sidebar.Scene.js"></script>
@@ -146,12 +142,26 @@
 				var timeout;
 
 				var saveState = function ( scene ) {
+				
+					if ( editor.config.getKey( 'autosave' ) === false ) {
+
+						return;
+
+					}
 
 					clearTimeout( timeout );
 
 					timeout = setTimeout( function () {
 
-						editor.storage.set( editor.scene.toJSON() );
+						editor.signals.savingStarted.dispatch();
+
+						timeout = setTimeout( function () {
+
+							editor.storage.set( editor.scene.toJSON() );
+
+							editor.signals.savingFinished.dispatch();
+
+						}, 100 );
 
 					}, 1000 );
 

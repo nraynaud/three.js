@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<meta charset="utf-8">
 		<title>three.js - examples</title>
+		<meta charset="utf-8">
 		<style>
 
 			@font-face {
@@ -67,7 +67,6 @@
 			#viewer {
 				position: absolute;
 				left: 310px;
-				width: -webkit-calc(100% - 310px); /* Safari */
 				width: calc(100% - 310px);
 				height: 100%;
 				border: 0px;
@@ -179,6 +178,7 @@
 				"webgl_loader_collada",
 				"webgl_loader_collada_keyframe",
 				"webgl_loader_collada_skinning",
+				"webgl_loader_collada_kinematics",
 				"webgl_loader_ctm",
 				"webgl_loader_ctm_materials",
 				"webgl_loader_gltf",
@@ -215,12 +215,15 @@
 				"webgl_materials_lightmap",
 				"webgl_materials_normalmap",
 				"webgl_materials_normalmap2",
+				"webgl_materials_parallaxmap",
 				"webgl_materials_shaders_fresnel",
 				"webgl_materials_skin",
 				"webgl_materials_texture_anisotropy",
 				"webgl_materials_texture_compressed",
 				"webgl_materials_texture_filters",
 				"webgl_materials_texture_manualmipmap",
+				"webgl_materials_texture_pvrtc",
+				"webgl_materials_texture_tga",
 				"webgl_materials_video",
 				"webgl_materials_wireframe",
 				"webgl_mirror",
@@ -347,6 +350,9 @@
 			"software": [
 				"software_geometry_earth",
 				"software_sandbox"
+			],
+			"svg": [
+				"svg_sandbox"
 			]
 		};
 
@@ -354,6 +360,17 @@
 
 		var list = document.getElementById( 'list' );
 		var viewer = document.getElementById( 'viewer' );
+
+		if ( /(iPad|iPhone|iPod)/g.test( navigator.userAgent ) ) {
+
+			viewer.addEventListener( 'load', function ( event ) {
+
+				viewer.contentWindow.innerWidth -= 10;
+				viewer.contentWindow.innerHeight -= 2;
+
+			} );
+
+		}
 
 		var container = document.createElement( 'div' );
 		list.appendChild( container );
