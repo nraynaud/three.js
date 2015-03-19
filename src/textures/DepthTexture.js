@@ -24,7 +24,6 @@ THREE.DepthTexture.prototype.clone = function () {
 
 	texture.width = this.width;	
 	texture.height = this.height;
-	texture.needsUpdate;
 
 	return texture;
 
