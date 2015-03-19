@@ -1,3 +1,7 @@
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 Sidebar.Script = function ( editor ) {
 
 	var signals = editor.signals;
@@ -14,54 +18,84 @@ Sidebar.Script = function ( editor ) {
 	container.addStatic( new UI.Text( 'Script' ).setTextTransform( 'uppercase' ) );
 	container.add( new UI.Break() );
 
-	var scriptsRow = new UI.Panel();
-	container.add( scriptsRow );
+	//
 
-	// source
+	var scriptsContainer = new UI.Panel();
+	container.add( scriptsContainer );
 
-	var timeout;
+	var newScript = new UI.Button( 'New' );
+	newScript.onClick( function () {
 
-	var scriptSourceRow = new UI.Panel();
-	var scriptSource = new UI.TextArea( 'javascript' ).setWidth( '240px' ).setHeight( '180px' ).setFontSize( '12px' );
-	scriptSource.onKeyUp( function () {
+		var script = { name: '', source: 'function update( event ) {}' };
+		editor.addScript( editor.selected, script );
 
-		clearTimeout( timeout );
+	} );
+	container.add( newScript );
 
-		timeout = setTimeout( function () {
+	/*
+	var loadScript = new UI.Button( 'Load' );
+	loadScript.setMarginLeft( '4px' );
+	container.add( loadScript );
+	*/
 
-			var object = editor.selected;
-			var source = scriptSource.getValue();
+	//
 
-			try {
+	function update() {
 
-				var script = new Function( 'scene', 'time', source ).bind( object.clone() );
-				script( new THREE.Scene(), 0 );
+		scriptsContainer.clear();
 
-				scriptSource.dom.classList.add( 'success' );
-				scriptSource.dom.classList.remove( 'fail' );
+		var object = editor.selected;
+		var scripts = editor.scripts[ object.uuid ];
 
-			} catch ( error ) {
+		if ( scripts !== undefined ) {
 
-				scriptSource.dom.classList.remove( 'success' );
-				scriptSource.dom.classList.add( 'fail' );
+			for ( var i = 0; i < scripts.length; i ++ ) {
 
-				return;
+				( function ( object, script ) {
+
+					var name = new UI.Input( script.name ).setWidth( '130px' ).setFontSize( '12px' );
+					name.onChange( function () {
+
+						script.name = this.getValue();
+
+						signals.scriptChanged.dispatch();
+
+					} );
+					scriptsContainer.add( name );
+
+					var edit = new UI.Button( 'Edit' );
+					edit.setMarginLeft( '4px' );
+					edit.onClick( function () {
+
+						signals.editScript.dispatch( object, script );
+
+					} );
+					scriptsContainer.add( edit );
+
+					var remove = new UI.Button( 'Remove' );
+					remove.setMarginLeft( '4px' );
+					remove.onClick( function () {
+
+						if ( confirm( 'Are you sure?' ) ) {
+
+							editor.removeScript( editor.selected, script );
+
+						}
+
+					} );
+					scriptsContainer.add( remove );
+
+					scriptsContainer.add( new UI.Break() );
+
+				} )( object, scripts[ i ] )
 
 			}
 
-			object.script = new THREE.Script( source );
+		}
 
-			editor.signals.objectChanged.dispatch( object );
+	}
 
-		}, 500 );
-
-	} );	
-
-	scriptSourceRow.add( scriptSource );
-
-	container.add( scriptSourceRow );
-
-	//
+	// signals
 
 	signals.objectSelected.add( function ( object ) {
 
@@ -69,15 +103,7 @@ Sidebar.Script = function ( editor ) {
 
 			container.setDisplay( 'block' );
 
-			if ( object.script !== undefined ) {
-
-				scriptSource.setValue( object.script.source );
-
-			} else {
-
-				scriptSource.setValue( '' );
-
-			}
+			update();
 
 		} else {
 
@@ -87,6 +113,9 @@ Sidebar.Script = function ( editor ) {
 
 	} );
 
+	signals.scriptAdded.add( update );
+	signals.scriptRemoved.add( update );
+
 	return container;
 
-}
+};

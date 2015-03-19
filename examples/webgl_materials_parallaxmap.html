@@ -84,6 +84,7 @@
 				initScene();
 
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				container.appendChild( renderer.domElement );
 
@@ -154,7 +155,7 @@
 				uniforms[ 'map' ].value = material.map;
 				uniforms[ 'bumpMap' ].value = material.bumpMap;
 
-				var geometry = new THREE.CubeGeometry( 1.0, 1.0, 1.0 );
+				var geometry = new THREE.BoxGeometry( 1.0, 1.0, 1.0 );
 				var mesh = new THREE.Mesh( geometry, material );
 				scene.add( mesh );
 

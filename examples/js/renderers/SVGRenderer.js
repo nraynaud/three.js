@@ -11,6 +11,7 @@ THREE.SVGObject = function ( node ) {
 };
 
 THREE.SVGObject.prototype = Object.create( THREE.Object3D.prototype );
+THREE.SVGObject.prototype.constructor = THREE.SVGObject;
 
 THREE.SVGRenderer = function () {
 
@@ -18,7 +19,7 @@ THREE.SVGRenderer = function () {
 
 	var _this = this,
 	_renderData, _elements, _lights,
-	_renderer = new THREE.Renderer(),
+	_projector = new THREE.Projector(),
 	_svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'),
 	_svgWidth, _svgHeight, _svgWidthHalf, _svgHeightHalf,
 
@@ -67,7 +68,7 @@ THREE.SVGRenderer = function () {
 
 	this.setQuality = function( quality ) {
 
-		switch(quality) {
+		switch (quality) {
 
 			case "high": _quality = 1; break;
 			case "low": _quality = 0; break;
@@ -87,6 +88,8 @@ THREE.SVGRenderer = function () {
 		_clearAlpha = alpha !== undefined ? alpha : 1;
 
 	};
+
+	this.setPixelRatio = function () {};
 
 	this.setSize = function( width, height ) {
 
@@ -135,7 +138,7 @@ THREE.SVGRenderer = function () {
 		_viewMatrix.copy( camera.matrixWorldInverse.getInverse( camera.matrixWorld ) );
 		_viewProjectionMatrix.multiplyMatrices( camera.projectionMatrix, _viewMatrix );
 
-		_renderData = _renderer.projectScene( scene, camera, this.sortObjects, this.sortElements );
+		_renderData = _projector.projectScene( scene, camera, this.sortObjects, this.sortElements );
 		_elements = _renderData.elements;
 		_lights = _renderData.lights;
 
@@ -212,7 +215,7 @@ THREE.SVGRenderer = function () {
 				var x =   _vector3.x * _svgWidthHalf;
 				var y = - _vector3.y * _svgHeightHalf;
 
-			 	var node = object.node;
+				var node = object.node;
 				node.setAttribute( 'transform', 'translate(' + x + ',' + y + ')' );
 
 				_svg.appendChild( node );
@@ -229,7 +232,7 @@ THREE.SVGRenderer = function () {
 		_directionalLights.setRGB( 0, 0, 0 );
 		_pointLights.setRGB( 0, 0, 0 );
 
-		for ( var l = 0, ll = lights.length; l < ll; l++ ) {
+		for ( var l = 0, ll = lights.length; l < ll; l ++ ) {
 
 			var light = lights[ l ];
 			var lightColor = light.color;

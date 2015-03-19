@@ -1,3 +1,7 @@
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
 Sidebar.Geometry.BufferGeometry = function ( signals ) {
 
 	var container = new UI.Panel();
@@ -5,7 +9,7 @@ Sidebar.Geometry.BufferGeometry = function ( signals ) {
 	// vertices
 
 	var verticesRow = new UI.Panel();
-	var vertices = new UI.Text().setColor( '#444' ).setFontSize( '12px' );
+	var vertices = new UI.Text().setFontSize( '12px' );
 
 	verticesRow.add( new UI.Text( 'Vertices' ).setWidth( '90px' ) );
 	verticesRow.add( vertices );
@@ -15,7 +19,7 @@ Sidebar.Geometry.BufferGeometry = function ( signals ) {
 	// faces
 
 	var facesRow = new UI.Panel();
-	var faces = new UI.Text().setColor( '#444' ).setFontSize( '12px' );
+	var faces = new UI.Text().setFontSize( '12px' );
 
 	facesRow.add( new UI.Text( 'Faces' ).setWidth( '90px' ) );
 	facesRow.add( faces );
