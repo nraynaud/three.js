@@ -5858,8 +5858,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		} else if ( renderTarget.stencilBuffer ) {
 			
-			_gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_STENCIL, depthTexture.width, depthTexture.height, 0, _gl.DEPTH_STENCIL, _glExtensionDepthTexture.UNSIGNED_INT_24_8_WEBGL, null);
-    _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_STENCIL_ATTACHMENT, _gl.TEXTURE_2D, depthTexture.__webglTexture, 0);
+			_gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_STENCIL, depthTexture.width, depthTexture.height, 0, _gl.DEPTH_STENCIL, extensions.get('WEBGL_depth_texture').UNSIGNED_INT_24_8_WEBGL, null);
+    		_gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_STENCIL_ATTACHMENT, _gl.TEXTURE_2D, depthTexture.__webglTexture, 0);
 
 		}
 
@@ -5940,7 +5940,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			if (renderTarget.depthBuffer || renderTarget.stencilBuffer) {
 
-				if ( renderTarget.depthTexture && _glExtensionDepthTexture ) setupDepthTexture(renderTarget);
+				if ( renderTarget.depthTexture && this.supportsDepthTextures() ) setupDepthTexture(renderTarget);
 				else setupDepthRenderbuffer(renderTarget);
 
 			}
