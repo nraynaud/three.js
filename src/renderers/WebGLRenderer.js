@@ -3148,13 +3148,6 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		if ( properties.get( renderTarget ).__webglFramebuffer ) {
 
-			if ( renderTarget.format !== THREE.RGBAFormat ) {
-
-				console.error( 'THREE.WebGLRenderer.readRenderTargetPixels: renderTarget is not in RGBA format. readPixels can read only RGBA format.' );
-				return;
-
-			}
-
 			var restore = false;
 
 			if ( properties.get( renderTarget ).__webglFramebuffer !== _currentFramebuffer ) {
@@ -3164,7 +3157,12 @@ THREE.WebGLRenderer = function ( parameters ) {
 				restore = true;
 
 			}
+			if ( renderTarget.format !== THREE.RGBAFormat ) {
 
+				console.error( 'THREE.WebGLRenderer.readRenderTargetPixels: renderTarget is not in RGBA format. readPixels can read only RGBA format.' );
+				return;
+
+			}
 			if ( _gl.checkFramebufferStatus( _gl.FRAMEBUFFER ) === _gl.FRAMEBUFFER_COMPLETE ) {
 
 				_gl.readPixels( x, y, width, height, _gl.RGBA, _gl.UNSIGNED_BYTE, buffer );
