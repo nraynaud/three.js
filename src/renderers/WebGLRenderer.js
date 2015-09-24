@@ -3909,7 +3909,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
             } else {
 
-                console.error( 'THREE.WebGLRenderer.readRenderTargetPixels: readPixels from renderTarget failed. Framebuffer not complete.' );
+                THREE.error( 'THREE.WebGLRenderer.readRenderTargetPixels: readPixels from renderTarget failed. Framebuffer not complete.' );
 
             }
 
