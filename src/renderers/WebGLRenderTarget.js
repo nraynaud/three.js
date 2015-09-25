@@ -1,8 +1,15 @@
 /**
  * @author szimek / https://github.com/szimek/
  * @author alteredq / http://alteredqualia.com/
+ * @author Marius Kintel / https://github.com/kintel
  */
 
+/*
+ In options, we can specify:
+ * Texture parameters for an auto-generated target texture
+ * An actual texture of type THREE.Texture
+ * An optional depthtexture of type THREE.DepthTexture
+*/
 THREE.WebGLRenderTarget = function ( width, height, options ) {
 
 	this.uuid = THREE.Math.generateUUID();
@@ -14,39 +21,11 @@ THREE.WebGLRenderTarget = function ( width, height, options ) {
 
 	this.texture = options.texture;
 	if (!this.texture) {
-		this.texture = {
-			uuid: THREE.Math.generateUUID(),
-			wrapS: options.wrapS !== undefined ? options.wrapS : THREE.ClampToEdgeWrapping,
-			wrapT: options.wrapT !== undefined ? options.wrapT : THREE.ClampToEdgeWrapping,
-			magFilter: options.magFilter !== undefined ? options.magFilter : THREE.LinearFilter,
-			minFilter: options.minFilter !== undefined ? options.minFilter : THREE.LinearMipMapLinearFilter,
-			anisotropy: options.anisotropy !== undefined ? options.anisotropy : 1,
-			offset: new THREE.Vector2( 0, 0 ),
-			repeat: new THREE.Vector2( 1, 1 ),
-			format: options.format !== undefined ? options.format : THREE.RGBAFormat,
-			type: options.type !== undefined ? options.type : THREE.UnsignedByteType,
-			clone: function () {
-				return this.copy.apply({ uuid: THREE.Math.generateUUID() }, [this]);
-			},
-			copy: function (source) {
-				this.wrapS = source.wrapS;
-				this.wrapT = source.wrapT;
-
-				this.magFilter = source.magFilter;
-				this.minFilter = source.minFilter;
-
-				this.anisotropy = source.anisotropy;
-
-				this.format = source.format;
-				this.type = source.type;
-
-				this.offset = source.offset.clone();
-				this.repeat = source.repeat.clone();
-
-				return this;
-
-			}
-		};
+		this.texture = new THREE.Texture(undefined, undefined, 
+																		 options.wrapS, options.wrapT,
+																		 options.magFilter, options.minFilter,
+																		 options.format, options.type,
+																		 options.anisotropy);
 	}
 	this.depthBuffer = options.depthBuffer !== undefined ? options.depthBuffer : true;
 	this.stencilBuffer = options.stencilBuffer !== undefined ? options.stencilBuffer : true;
