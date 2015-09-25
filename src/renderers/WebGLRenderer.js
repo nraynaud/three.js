@@ -3034,11 +3034,9 @@ THREE.WebGLRenderer = function ( parameters ) {
 		}
 		else {
 
-			// FIXME: What kind of object is shareDepthFrom?
-			// Should we wrap it in a properties object?
 			if ( renderTarget.shareDepthFrom ) {
-				
-				renderTargetProperties.__webglRenderbuffer = renderTarget.shareDepthFrom.__webglRenderbuffer;
+				var sharedProperties = properties.get( renderTarget.shareDepthFrom );
+				renderTargetProperties.__webglRenderbuffer = sharedProperties.__webglRenderbuffer;
 				if ( renderTarget.depthBuffer && ! renderTarget.stencilBuffer ) {
 					
 					_gl.framebufferRenderbuffer( _gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT, _gl.RENDERBUFFER, renderTargetProperties.__webglRenderbuffer );
