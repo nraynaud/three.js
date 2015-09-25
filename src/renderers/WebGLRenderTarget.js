@@ -5,6 +5,8 @@
 
 THREE.WebGLRenderTarget = function ( width, height, options ) {
 
+	this.uuid = THREE.Math.generateUUID();
+
 	this.width = width;
 	this.height = height;
 
@@ -12,9 +14,8 @@ THREE.WebGLRenderTarget = function ( width, height, options ) {
 
 	this.texture = options.texture;
 	if (!this.texture) {
-
 		this.texture = {
-
+			uuid: THREE.Math.generateUUID(),
 			wrapS: options.wrapS !== undefined ? options.wrapS : THREE.ClampToEdgeWrapping,
 			wrapT: options.wrapT !== undefined ? options.wrapT : THREE.ClampToEdgeWrapping,
 			magFilter: options.magFilter !== undefined ? options.magFilter : THREE.LinearFilter,
@@ -24,32 +25,29 @@ THREE.WebGLRenderTarget = function ( width, height, options ) {
 			repeat: new THREE.Vector2( 1, 1 ),
 			format: options.format !== undefined ? options.format : THREE.RGBAFormat,
 			type: options.type !== undefined ? options.type : THREE.UnsignedByteType,
-
 			clone: function () {
+				return this.copy.apply({ uuid: THREE.Math.generateUUID() }, [this]);
+			},
+			copy: function (source) {
+				this.wrapS = source.wrapS;
+				this.wrapT = source.wrapT;
 
-				var tmp = {};
-				tmp.wrapS = this.wrapS;
-				tmp.wrapT = this.wrapT;
-				
-				tmp.magFilter = this.magFilter;
-				tmp.minFilter = this.minFilter;
-				
-				tmp.anisotropy = this.anisotropy;
-				
-				tmp.format = this.format;
-				tmp.type = this.type;
-				
-				tmp.offset = this.offset.clone();
-				tmp.repeat = this.repeat.clone();
-				
-				return tmp;
-				
+				this.magFilter = source.magFilter;
+				this.minFilter = source.minFilter;
+
+				this.anisotropy = source.anisotropy;
+
+				this.format = source.format;
+				this.type = source.type;
+
+				this.offset = source.offset.clone();
+				this.repeat = source.repeat.clone();
+
+				return this;
+
 			}
-
 		};
-
 	}
-
 	this.depthBuffer = options.depthBuffer !== undefined ? options.depthBuffer : true;
 	this.stencilBuffer = options.stencilBuffer !== undefined ? options.stencilBuffer : true;
 	this.depthTexture = options.depthTexture;
@@ -74,23 +72,30 @@ THREE.WebGLRenderTarget.prototype = {
 			this.dispose();
 
 		}
+
 	},
 
 	clone: function () {
 
-		var tmp = new THREE.WebGLRenderTarget( this.width, this.height );
+		return new this.constructor().copy( this );
 
-		tmp.texture = this.texture.clone();
-		if (this.depthTexture) tmp.depthTexture = this.depthTexture.clone();
+	},
 
-		tmp.depthBuffer = this.depthBuffer;
-		tmp.stencilBuffer = this.stencilBuffer;
+	copy: function ( source ) {
 
-		tmp.generateMipmaps = this.generateMipmaps;
+		this.width = source.width;
+		this.height = source.height;
 
-		tmp.shareDepthFrom = this.shareDepthFrom;
+		this.depthBuffer = source.depthBuffer;
+		this.stencilBuffer = source.stencilBuffer;
+		this.texture = this.texture.clone();
+    if (this.depthTexture) this.depthTexture = this.depthTexture.clone();
 
-		return tmp;
+		this.generateMipmaps = source.generateMipmaps;
+
+		this.shareDepthFrom = source.shareDepthFrom;
+
+		return this;
 
 	},
 

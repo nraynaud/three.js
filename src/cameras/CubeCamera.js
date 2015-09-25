@@ -47,6 +47,8 @@ THREE.CubeCamera = function ( near, far, cubeResolution ) {
 
 	this.updateCubeMap = function ( renderer, scene ) {
 
+		if ( this.parent === null ) this.updateMatrixWorld();
+
 		var renderTarget = this.renderTarget;
 		var generateMipmaps = renderTarget.generateMipmaps;
 

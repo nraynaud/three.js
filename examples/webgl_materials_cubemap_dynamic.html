@@ -194,8 +194,8 @@
 
 				// SHADOW
 
-				renderer.shadowMapCullFace = THREE.CullFaceBack;
-				renderer.shadowMapEnabled = true;
+				renderer.shadowMap.cullFace = THREE.CullFaceBack;
+				renderer.shadowMap.enabled = true;
 
 				// STATS
 
@@ -262,11 +262,11 @@
 
 					var params  = {
 
-						"a" : { map: flareA, useScreenCoordinates: false, color: 0xffffff, blending: THREE.AdditiveBlending },
-						"b" : { map: flareB, useScreenCoordinates: false, color: 0xffffff, blending: THREE.AdditiveBlending },
+						"a" : { map: flareA, color: 0xffffff, blending: THREE.AdditiveBlending },
+						"b" : { map: flareB, color: 0xffffff, blending: THREE.AdditiveBlending },
 
-						"ar" : { map: flareA, useScreenCoordinates: false, color: 0xff0000, blending: THREE.AdditiveBlending },
-						"br" : { map: flareB, useScreenCoordinates: false, color: 0xff0000, blending: THREE.AdditiveBlending }
+						"ar" : { map: flareA, color: 0xff0000, blending: THREE.AdditiveBlending },
+						"br" : { map: flareB, color: 0xff0000, blending: THREE.AdditiveBlending }
 
 					};
 
@@ -545,8 +545,7 @@
 
 			//
 
-			var shadowTexture = new THREE.Texture( canvas );
-			shadowTexture.needsUpdate = true;
+			var shadowTexture = new THREE.CanvasTexture( canvas );
 
 			var shadowPlane = new THREE.PlaneBufferGeometry( 400, 400 );
 			var shadowMaterial = new THREE.MeshBasicMaterial( {
@@ -982,7 +981,7 @@
 				// render scene
 
 				renderer.autoClear = false;
-				renderer.shadowMapEnabled = true;
+				renderer.shadowMap.enabled = true;
 
 				camera.lookAt( cameraTarget );
 
@@ -991,7 +990,7 @@
 				renderer.clear();
 				composer.render( 0.1 );
 
-				renderer.shadowMapEnabled = false;
+				renderer.shadowMap.enabled = false;
 
 			}
 

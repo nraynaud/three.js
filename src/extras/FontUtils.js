@@ -6,10 +6,6 @@
  *
  * It uses techniques used in:
  *
- * 	typeface.js and canvastext
- * 		For converting fonts and rendering with javascript
- *		http://typeface.neocracy.org
- *
  *	Triangulation ported from AS3
  *		Simple Polygon Triangulation
  *		http://actionsnippet.com/?p=1462
@@ -35,9 +31,9 @@ THREE.FontUtils = {
 
 		try {
 
-			return this.faces[ this.face ][ this.weight ][ this.style ];
+			return this.faces[ this.face.toLowerCase() ][ this.weight ][ this.style ];
 
-		} catch (e) {
+		} catch ( e ) {
 
 			throw "The font " + this.face + " with " + this.weight + " weight and " + this.style + " style is missing."
 
@@ -134,7 +130,7 @@ THREE.FontUtils = {
 
 				action = outline[ i ++ ];
 
-				//THREE.log( action );
+				//console.log( action );
 
 				switch ( action ) {
 
@@ -180,6 +176,7 @@ THREE.FontUtils = {
 							var t = i2 / divisions;
 							THREE.Shape.Utils.b2( t, cpx0, cpx1, cpx );
 							THREE.Shape.Utils.b2( t, cpy0, cpy1, cpy );
+
 						}
 
 					}
@@ -221,11 +218,13 @@ THREE.FontUtils = {
 				}
 
 			}
+
 		}
 
 
 
-		return { offset: glyph.ha * scale, path:path };
+		return { offset: glyph.ha * scale, path: path };
+
 	}
 
 };
@@ -233,7 +232,7 @@ THREE.FontUtils = {
 
 THREE.FontUtils.generateShapes = function ( text, parameters ) {
 
-	// Parameters 
+	// Parameters
 
 	parameters = parameters || {};
 
@@ -331,7 +330,7 @@ THREE.FontUtils.generateShapes = function ( text, parameters ) {
 				//throw ( "Warning, unable to triangulate polygon!" );
 				//return null;
 				// Sometimes warning is fine, especially polygons are triangulated in reverse.
-				THREE.warn( 'THREE.FontUtils: Warning, unable to triangulate polygon! in Triangulate.process()' );
+				console.warn( 'THREE.FontUtils: Warning, unable to triangulate polygon! in Triangulate.process()' );
 
 				if ( indices ) return vertIndices;
 				return result;
@@ -464,5 +463,6 @@ THREE.FontUtils.generateShapes = function ( text, parameters ) {
 } )( THREE.FontUtils );
 
 // To use the typeface.js face files, hook up the API
-self._typeface_js = { faces: THREE.FontUtils.faces, loadFace: THREE.FontUtils.loadFace };
-THREE.typeface_js = self._typeface_js;
+
+THREE.typeface_js = { faces: THREE.FontUtils.faces, loadFace: THREE.FontUtils.loadFace };
+if ( typeof self !== 'undefined' ) self._typeface_js = THREE.typeface_js;
