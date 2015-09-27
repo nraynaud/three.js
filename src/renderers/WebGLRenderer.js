@@ -192,6 +192,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 	extensions.get( 'OES_texture_float_linear' );
 	extensions.get( 'OES_texture_half_float' );
 	extensions.get( 'OES_texture_half_float_linear' );
+	extensions.get( 'WEBGL_depth_texture' );
 	extensions.get( 'OES_standard_derivatives' );
 	extensions.get( 'ANGLE_instanced_arrays' );
 
@@ -569,14 +570,14 @@ THREE.WebGLRenderer = function ( parameters ) {
 			for ( var i = 0; i < 6; i ++ ) {
 
 				_gl.deleteFramebuffer( renderTargetProperties.__webglFramebuffer[ i ] );
-				_gl.deleteRenderbuffer( renderTargetProperties.__webglRenderbuffer[ i ] );
+				if ( renderTargetProperties.__webglRenderbuffer[ i ] ) _gl.deleteRenderbuffer( renderTargetProperties.__webglRenderbuffer[ i ] );
 
 			}
 
 		} else {
 
 			_gl.deleteFramebuffer( renderTargetProperties.__webglFramebuffer );
-			_gl.deleteRenderbuffer( renderTargetProperties.__webglRenderbuffer );
+			if ( renderTargetProperties.__webglRenderbuffer ) _gl.deleteRenderbuffer( renderTargetProperties.__webglRenderbuffer );
 
 		}
 
@@ -2909,8 +2910,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 				var image = cubeImage[ 0 ];
 				var isImagePowerOfTwo = THREE.Math.isPowerOfTwo( image.width ) && THREE.Math.isPowerOfTwo( image.height );
-				var glFormat = paramThreeToGL( texture.format );
-				var glType = paramThreeToGL( texture.type );
+				var glFormat = paramThreeToGL( renderTarget.texture.format );
+				var glType = paramThreeToGL( renderTarget.texture.type );
 
 				setTextureParameters( _gl.TEXTURE_CUBE_MAP, texture, isImagePowerOfTwo );
 
@@ -3057,6 +3058,29 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	};
 
+	// Setup GL resources for the depth texture
+	function setupDepthTexture(depthTexture) {
+
+		var depthTextureProperties = properties.get( depthTexture );
+		var isPowerOfTwo = THREE.Math.isPowerOfTwo( depthTexture.width ) && THREE.Math.isPowerOfTwo( depthTexture.height );
+
+		depthTextureProperties.__webglTexture = _gl.createTexture();
+
+		_gl.bindTexture(_gl.TEXTURE_2D, depthTextureProperties.__webglTexture);
+		setTextureParameters(_gl.TEXTURE_2D, depthTexture, isPowerOfTwo);
+
+		if (depthTexture.hasStencil) {
+			_gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_STENCIL, depthTexture.width, depthTexture.height, 0, _gl.DEPTH_STENCIL, extensions.get( 'WEBGL_depth_texture' ).UNSIGNED_INT_24_8_WEBGL, null);
+			_gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_STENCIL_ATTACHMENT, _gl.TEXTURE_2D, depthTextureProperties.__webglTexture, 0);
+		}
+		else {
+			_gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT, depthTexture.width, depthTexture.height, 0, _gl.DEPTH_COMPONENT, _gl.UNSIGNED_INT, null);
+			_gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT, _gl.TEXTURE_2D, depthTextureProperties.__webglTexture, 0);
+		}
+
+		_gl.bindTexture(_gl.TEXTURE_2D, null);
+	}
+
 	// Set up GL resources for the render target
 	function setupRenderTarget( renderTarget ) {
 
@@ -3123,10 +3147,14 @@ THREE.WebGLRenderer = function ( parameters ) {
 		//
 		// Setup depth and stencil buffers
 		//
-		if ( renderTarget.depthBuffer ) {
-
-			setupDepthRenderbuffer( renderTarget );
-
+		if ( renderTarget.depth && extensions.get( 'WEBGL_depth_texture' ) ) {
+			// FIXME: Warning if WEBGL_depth_texture not available?
+			_gl.bindFramebuffer( _gl.FRAMEBUFFER, renderTargetProperties.__webglFramebuffer );
+			setupDepthTexture(renderTarget.depth);
+			_gl.bindFramebuffer(_gl.FRAMEBUFFER, null );
+		}
+		else if ( renderTarget.depthBuffer ) {
+			setupDepthRenderbuffer(renderTarget);
 		}
 
 	}
