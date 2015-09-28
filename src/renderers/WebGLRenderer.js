@@ -2910,8 +2910,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 				var image = cubeImage[ 0 ];
 				var isImagePowerOfTwo = THREE.Math.isPowerOfTwo( image.width ) && THREE.Math.isPowerOfTwo( image.height );
-				var glFormat = paramThreeToGL( renderTarget.texture.format );
-				var glType = paramThreeToGL( renderTarget.texture.type );
+				var glFormat = paramThreeToGL( texture.format );
+				var glType = paramThreeToGL( texture.type );
 
 				setTextureParameters( _gl.TEXTURE_CUBE_MAP, texture, isImagePowerOfTwo );
 
