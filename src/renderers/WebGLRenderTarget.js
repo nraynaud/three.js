@@ -67,8 +67,8 @@ THREE.WebGLRenderTarget.prototype = {
 
 		this.depthBuffer = source.depthBuffer;
 		this.stencilBuffer = source.stencilBuffer;
-		this.texture = this.texture.clone();
-    if (this.depthTexture) this.depthTexture = this.depthTexture.clone();
+		this.texture = source.texture.clone();
+    if (source.depthTexture) this.depthTexture = source.depthTexture.clone();
 
 		this.generateMipmaps = source.generateMipmaps;
 
