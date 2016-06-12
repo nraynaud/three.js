@@ -122,7 +122,7 @@ function loadObject( data ) {
 function loadGeometry( data, url ) {
 
     var loader = new THREE.JSONLoader();
-    var texturePath = loader.extractUrlBase( url );
+    var texturePath = THREE.Loader.prototype.extractUrlBase( url );
     data = loader.parse( data, texturePath );
 
     if ( data.materials === undefined ) {
@@ -132,7 +132,7 @@ function loadGeometry( data, url ) {
 
     }
 
-    var material = new THREE.MeshFaceMaterial( data.materials );
+    var material = new THREE.MultiMaterial( data.materials );
     var mesh;
 
     if ( data.geometry.animations !== undefined && data.geometry.animations.length > 0 ) {

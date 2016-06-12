@@ -19,7 +19,7 @@ THREE.SpritePlugin = function ( renderer, sprites ) {
 	var spriteRotation = new THREE.Quaternion();
 	var spriteScale = new THREE.Vector3();
 
-	var init = function () {
+	function init() {
 
 		var vertices = new Float32Array( [
 			- 0.5, - 0.5,  0, 0,
@@ -83,7 +83,7 @@ THREE.SpritePlugin = function ( renderer, sprites ) {
 		texture = new THREE.Texture( canvas );
 		texture.needsUpdate = true;
 
-	};
+	}
 
 	this.render = function ( scene, camera ) {
 
@@ -351,8 +351,12 @@ THREE.SpritePlugin = function ( renderer, sprites ) {
 	}
 
 	function painterSortStable ( a, b ) {
+		
+		if ( a.renderOrder !== b.renderOrder ) {
 
-		if ( a.z !== b.z ) {
+			return a.renderOrder - b.renderOrder;
+
+		} else if ( a.z !== b.z ) {
 
 			return b.z - a.z;
 

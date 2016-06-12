@@ -514,7 +514,6 @@
 				"DbgColor" : 15658734,
 				"DbgIndex" : 0,
 				"DbgName" : "Material",
-				"colorAmbient" : [0.0, 0.0, 0.0],
 				"colorDiffuse" : [0.8, 0.8, 0.8],
 				"colorSpecular" : [0.5, 0.5, 0.5],
 				"specularCoef" : 50,
@@ -686,22 +685,22 @@
 		},
 
 		"face": {
-			"type": "MeshFaceMaterial",
+			"type": "MultiMaterial",
 			"parameters": {}
 		},
 
 		"multi_1": {
-			"type": "MeshFaceMaterial",
+			"type": "MultiMaterial",
 			"parameters": {}
 		},
 
 		"multi_2": {
-			"type": "MeshFaceMaterial",
+			"type": "MultiMaterial",
 			"parameters": { "materials": [ "phong_compressed_cube", "phong_man", "phong_hand", "minecraft", "backsignals" ] }
 		},
 
 		"multi_veyron": {
-			"type": "MeshFaceMaterial",
+			"type": "MultiMaterial",
 			"parameters": { "materials": [ "interior", "chrome", "darkerchrome", "glass", "chrome", "chrome", "backlights", "backsignals" ] }
 		}
 
